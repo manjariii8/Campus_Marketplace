@@ -508,6 +508,201 @@ const ProductForm = ({
           </div>
         </div>
       </section>
+      
+      {/* =========================
+          CAMPUS REUSE DETAILS
+      ========================= */}
+
+      <section className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5 sm:p-6">
+        <div className="mb-5">
+          <h3 className="font-semibold text-slate-900">
+            Campus Reuse Details
+          </h3>
+          <p className="mt-1 text-sm text-slate-600">
+            Help students understand the item's condition and arrange
+            a convenient campus pickup.
+          </p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label
+              htmlFor="listingType"
+              className="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Listing Type
+            </label>
+
+            <select
+              id="listingType"
+              name="listingType"
+              value={formData.listingType || "ITEM"}
+              onChange={(e) => {
+                const listingType = e.target.value;
+
+                setFormData((previous) => ({
+                  ...previous,
+                  listingType,
+                  ...(listingType === "ITEM"
+                    ? {
+                        course: "",
+                        subject: "",
+                        semester: "",
+                      }
+                    : {}),
+                }));
+              }}
+              disabled={loading}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              required
+            >
+              <option value="ITEM">Regular Item</option>
+              <option value="STUDY_MATERIAL">Study Material</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="condition"
+              className="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Item Condition
+            </label>
+
+            <select
+              id="condition"
+              name="condition"
+              value={formData.condition || "GOOD"}
+              onChange={handleChange}
+              disabled={loading}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              required
+            >
+              <option value="LIKE_NEW">Like New</option>
+              <option value="GOOD">Good</option>
+              <option value="FAIR">Fair</option>
+              <option value="FOR_PARTS">For Parts / Repair</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label
+              htmlFor="defects"
+              className="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Defects or Damage
+              <span className="ml-2 font-normal text-slate-400">
+                (Optional)
+              </span>
+            </label>
+
+            <textarea
+              id="defects"
+              name="defects"
+              value={formData.defects || ""}
+              onChange={handleChange}
+              disabled={loading}
+              rows={2}
+              maxLength={1000}
+              placeholder="E.g. small scratch on the back, a few highlighted pages..."
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label
+              htmlFor="pickupLocation"
+              className="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Campus Pickup Location
+              <span className="ml-2 font-normal text-slate-400">
+                (Optional)
+              </span>
+            </label>
+
+            <input
+              id="pickupLocation"
+              type="text"
+              name="pickupLocation"
+              value={formData.pickupLocation || ""}
+              onChange={handleChange}
+              disabled={loading}
+              maxLength={255}
+              placeholder="E.g. college library entrance"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Use a public campus meeting point rather than your private
+              address.
+            </p>
+          </div>
+
+          {formData.listingType === "STUDY_MATERIAL" && (
+            <>
+              <div>
+                <label
+                  htmlFor="course"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Course
+                </label>
+                <input
+                  id="course"
+                  type="text"
+                  name="course"
+                  value={formData.course || ""}
+                  onChange={handleChange}
+                  disabled={loading}
+                  maxLength={150}
+                  placeholder="E.g. B.Tech CSE"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="subject"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Subject
+                </label>
+                <input
+                  id="subject"
+                  type="text"
+                  name="subject"
+                  value={formData.subject || ""}
+                  onChange={handleChange}
+                  disabled={loading}
+                  maxLength={150}
+                  placeholder="E.g. Data Structures"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="semester"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Semester
+                </label>
+                <input
+                  id="semester"
+                  type="text"
+                  name="semester"
+                  value={formData.semester || ""}
+                  onChange={handleChange}
+                  disabled={loading}
+                  maxLength={50}
+                  placeholder="E.g. Semester 3"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
 
       {/* =========================
           PRODUCT IMAGE

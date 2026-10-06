@@ -17,11 +17,13 @@ export const registerSchema = z
   .object({
     name: z
       .string()
+      .trim()
       .min(2, "Name must contain at least 2 characters")
       .max(100, "Name cannot exceed 100 characters"),
 
     email: z
       .string()
+      .trim()
       .email("Please enter a valid email address"),
 
     password: z
@@ -32,9 +34,12 @@ export const registerSchema = z
       .string()
       .min(1, "Please confirm your password"),
 
-    role: z.enum(["CUSTOMER", "SELLER"], {
-      message: "Please select an account type",
-    }),
+    campusId: z
+      .number({
+        message: "Please select your campus",
+      })
+      .int("Please select a valid campus")
+      .positive("Please select your campus"),
   })
   .refine(
     (data) => data.password === data.confirmPassword,

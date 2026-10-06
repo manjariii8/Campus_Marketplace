@@ -45,6 +45,11 @@ const Cart = () => {
                     : Array.isArray(response.data?.data)
                         ? response.data.data
                         : [];
+            
+            console.log(
+    "First cart item:",
+    JSON.stringify(cartData[0], null, 2)
+);
 
             setItems(cartData);
 

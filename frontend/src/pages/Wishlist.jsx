@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
-import { FiHeart, FiShoppingCart, FiTrash2 } from "react-icons/fi";
-import toast from "react-hot-toast";
+
+import {
+  FiHeart,
+  FiShoppingCart,
+  FiTrash2,
+} from "react-icons/fi";
 
 import {
   getWishlist,
@@ -16,6 +21,9 @@ const Wishlist = () => {
   const [removingId, setRemovingId] = useState(null);
   const [cartLoadingId, setCartLoadingId] = useState(null);
 
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+
   /*
   |--------------------------------------------------------------------------
   | LOAD WISHLIST
@@ -28,19 +36,18 @@ const Wishlist = () => {
 
   const loadWishlist = async () => {
     setLoading(true);
+    setMessage("");
+    setMessageType("");
 
     try {
       const response = await getWishlist();
 
-      
-
       /*
-       * Backend WishlistController returns:
+       * Backend WishlistController may return:
        *
-       * ResponseEntity<List<WishlistResponse>>
+       * List<WishlistResponse>
        *
-       * Therefore response.data itself should be
-       * the array.
+       * or an ApiResponse wrapper.
        */
 
       const data = Array.isArray(response.data)
@@ -54,11 +61,12 @@ const Wishlist = () => {
         error
       );
 
-      toast.error(
-        "Unable to load wishlist."
-      );
-
       setWishlist([]);
+
+      setMessage(
+        "Unable to load wishlist. Please try again."
+      );
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -72,6 +80,8 @@ const Wishlist = () => {
 
   const handleRemove = async (productId) => {
     setRemovingId(productId);
+    setMessage("");
+    setMessageType("");
 
     try {
       await removeFromWishlist(productId);
@@ -83,18 +93,18 @@ const Wishlist = () => {
         )
       );
 
-      toast.success(
-        "Removed from wishlist."
-      );
+      setMessage("Removed from wishlist.");
+      setMessageType("success");
     } catch (error) {
       console.error(
         "Remove wishlist error:",
         error
       );
 
-      toast.error(
-        "Unable to remove product."
+      setMessage(
+        "Unable to remove product from wishlist."
       );
+      setMessageType("error");
     } finally {
       setRemovingId(null);
     }
@@ -109,7 +119,17 @@ const Wishlist = () => {
   const handleAddToCart = async (product) => {
     const productId = getProductId(product);
 
+    if (!productId) {
+      setMessage(
+        "Product information is missing."
+      );
+      setMessageType("error");
+      return;
+    }
+
     setCartLoadingId(productId);
+    setMessage("");
+    setMessageType("");
 
     try {
       await addToCart({
@@ -117,21 +137,25 @@ const Wishlist = () => {
         quantity: 1,
       });
 
-      toast.success(
-        "Product added to cart."
-      );
+      setMessage("Product added to cart.");
+      setMessageType("success");
     } catch (error) {
       console.error(
         "Add to cart error:",
         error
       );
 
-      const message =
+      const responseMessage =
         error?.response?.data?.message ||
         error?.response?.data ||
         "Unable to add product to cart.";
 
-      toast.error(message);
+      setMessage(
+        typeof responseMessage === "string"
+          ? responseMessage
+          : "Unable to add product to cart."
+      );
+      setMessageType("error");
     } finally {
       setCartLoadingId(null);
     }
@@ -141,10 +165,6 @@ const Wishlist = () => {
   |--------------------------------------------------------------------------
   | PRODUCT ID
   |--------------------------------------------------------------------------
-  |
-  | Depending on your WishlistResponse, the product
-  | may be directly inside item or inside item.product.
-  |
   */
 
   const getProductId = (item) => {
@@ -167,6 +187,30 @@ const Wishlist = () => {
 
   /*
   |--------------------------------------------------------------------------
+  | PRODUCT IMAGE
+  |--------------------------------------------------------------------------
+  |
+  | Supports the image formats used by the marketplace.
+  |
+  | Priority:
+  | 1. imageUrl
+  | 2. imageData
+  | 3. image
+  | 4. placeholder
+  |
+  */
+
+  const getProductImage = (product) => {
+    return (
+      product?.imageUrl ||
+      product?.imageData ||
+      product?.image ||
+      "https://placehold.co/500x350/f8fafc/1e293b?text=Product"
+    );
+  };
+
+  /*
+  |--------------------------------------------------------------------------
   | LOADING
   |--------------------------------------------------------------------------
   */
@@ -184,22 +228,22 @@ const Wishlist = () => {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
-            {[1, 2, 3, 4].map(
-              (item) => (
-                <div
-                  key={item}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
-                >
-                  <div className="h-56 animate-pulse bg-slate-200" />
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+              >
+                <div className="h-56 animate-pulse bg-slate-200" />
 
-                  <div className="space-y-3 p-5">
-                    <div className="h-5 animate-pulse rounded bg-slate-200" />
-                    <div className="h-4 animate-pulse rounded bg-slate-200" />
-                    <div className="h-10 animate-pulse rounded bg-slate-200" />
-                  </div>
+                <div className="space-y-3 p-5">
+                  <div className="h-5 animate-pulse rounded bg-slate-200" />
+
+                  <div className="h-4 animate-pulse rounded bg-slate-200" />
+
+                  <div className="h-10 animate-pulse rounded bg-slate-200" />
                 </div>
-              )
-            )}
+              </div>
+            ))}
 
           </div>
         </div>
@@ -262,6 +306,19 @@ const Wishlist = () => {
 
       <div className="mx-auto max-w-7xl px-6 py-12">
 
+        {message && (
+          <div
+            className={`mb-6 rounded-xl border px-4 py-3 text-sm font-medium ${
+              messageType === "success"
+                ? "border-green-200 bg-green-50 text-green-700"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}
+            role="alert"
+          >
+            {message}
+          </div>
+        )}
+
         {/* HEADER */}
 
         <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -308,11 +365,9 @@ const Wishlist = () => {
 
           {wishlist.map((item) => {
 
-            const product =
-              getProduct(item);
+            const product = getProduct(item);
 
-            const productId =
-              getProductId(item);
+            const productId = getProductId(item);
 
             return (
               <div
@@ -322,20 +377,43 @@ const Wishlist = () => {
 
                 {/* IMAGE */}
 
-                <div className="relative">
+                <div className="relative overflow-hidden bg-slate-100">
 
-                  <img
-                    src={
-                      product?.imageUrl ||
-                      product?.image ||
-                      "https://placehold.co/500x350/f8fafc/1e293b?text=Product"
-                    }
-                    alt={
-                      product?.name ||
-                      "Product"
-                    }
-                    className="h-56 w-full object-cover transition duration-500 group-hover:scale-105"
-                  />
+                  <div className="h-56">
+
+                    <img
+                      src={getProductImage(product)}
+                      alt={
+                        product?.name ||
+                        "Product"
+                      }
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      onError={(event) => {
+                        console.error(
+                          "WISHLIST PRODUCT IMAGE FAILED"
+                        );
+
+                        console.error(
+                          "imageUrl:",
+                          product?.imageUrl
+                        );
+
+                        console.error(
+                          "imageData:",
+                          product?.imageData
+                        );
+
+                        console.error(
+                          "image:",
+                          product?.image
+                        );
+
+                        event.currentTarget.src =
+                          "https://placehold.co/500x350/f8fafc/1e293b?text=Product";
+                      }}
+                    />
+
+                  </div>
 
                   {/* REMOVE */}
 
@@ -377,8 +455,7 @@ const Wishlist = () => {
                   )}
 
                   <p className="mt-4 text-2xl font-bold text-blue-700">
-                    ₹
-                    {product?.price ?? "0"}
+                    ₹{product?.price ?? "0"}
                   </p>
 
                   {/* ACTIONS */}
@@ -396,9 +473,7 @@ const Wishlist = () => {
                       }
                       className="flex flex-1 items-center justify-center rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
                     >
-                      <FiShoppingCart
-                        className="mr-2"
-                      />
+                      <FiShoppingCart className="mr-2" />
 
                       {cartLoadingId ===
                       productId

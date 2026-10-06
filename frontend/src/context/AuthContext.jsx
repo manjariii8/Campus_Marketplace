@@ -94,6 +94,12 @@ export const AuthProvider = ({ children }) => {
       name: authData.name,
       email: authData.email,
       role: authData.role,
+
+      // Campus information returned by the backend
+      campusId: authData.campusId,
+      campusName: authData.campusName,
+      campusCity: authData.campusCity,
+      campusState: authData.campusState,
     };
 
     if (!token) {
@@ -129,7 +135,6 @@ export const AuthProvider = ({ children }) => {
    * LOGOUT
    */
   const logout = () => {
-
     removeToken();
     removeUser();
 
@@ -188,4 +193,3 @@ export const useAuth = () => {
 };
 
 export default useAuth;
-

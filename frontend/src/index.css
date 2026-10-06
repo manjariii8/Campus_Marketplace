@@ -8,9 +8,18 @@ html {
 /* Prevent horizontal scrolling */
 body {
   overflow-x: hidden;
+  font-family: "Inter", sans-serif;
+}
+
+/* Keep the same font throughout the entire application */
+*,
+*::before,
+*::after {
+  font-family: inherit;
 }
 
 /* Better font rendering */
 body {
-  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

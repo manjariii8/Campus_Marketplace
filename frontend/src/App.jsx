@@ -21,7 +21,9 @@ import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
-import SellerProductDetails from "./pages/SellerProductDetails";
+import WantedPostCreate from "./pages/WantedPostCreate";
+import WantedBoard from "./pages/WantedBoard";
+import WantedPostDetails from "./pages/WantedPostDetails";
 
 /* Support */
 import HelpCenter from "./pages/HelpCenter";
@@ -43,6 +45,8 @@ import SellerProfile from "./pages/SellerProfile";
 import AddProduct from "./pages/AddProducts";
 import EditProduct from "./pages/EditProduct";
 import SellerEditProfile from "./pages/SellerEditProfile";
+import SellerApplication from "./pages/SellerApplication";
+import SellerProductDetails from "./pages/SellerProductDetails";
 
 /* Admin */
 import AdminLayout from "./layouts/AdminLayout";
@@ -57,7 +61,6 @@ import Analytics from "./admin/pages/Analytics";
 function App() {
   return (
     <Routes>
-
       {/* =====================================================
           CUSTOMER WEBSITE
       ====================================================== */}
@@ -67,98 +70,72 @@ function App() {
         {/* Public customer pages */}
         <Route path="/" element={<Home />} />
 
-        <Route path="/products" element={<Products />} />
+        {/* =================================================
+            CAMPUS MARKETPLACE
+            These pages require authentication because the
+            backend filters marketplace data by campus.
+        ================================================== */}
 
-        <Route path="/categories" element={<Categories />} />
-
-        <Route path="/product/:id" element={<ProductDetails />} />
-
-        <Route path="/search" element={<Search />} />
-
-        <Route path="/seller/products/:id" element={<SellerProductDetails />} />
-
-        {/* Customer-only pages */}
         <Route element={<CustomerRoute />}>
+          <Route path="/products" element={<Products />} />
 
-          <Route
-            path="/cart"
-            element={<Cart />}
-          />
+          <Route path="/categories" element={<Categories />} />
 
-          <Route
-            path="/wishlist"
-            element={<Wishlist />}
-          />
+          <Route path="/product/:id" element={<ProductDetails />} />
 
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
+          <Route path="/search" element={<Search />} />
 
-          <Route
-            path="/checkout"
-            element={<Checkout />}
-          />
+          {/* Customer-only pages */}
+          <Route path="/cart" element={<Cart />} />
 
-          <Route
-            path="/order-success"
-            element={<OrderSuccess />}
-          />
+          <Route path="/wishlist" element={<Wishlist />} />
 
-          <Route
-            path="/orders"
-            element={<Orders />}
-          />
+          <Route path="/profile" element={<Profile />} />
 
-          <Route
-            path="/orders/:id"
-            element={<OrderDetails />}
-          />
+          <Route path="/checkout" element={<Checkout />} />
 
+          <Route path="/order-success" element={<OrderSuccess />} />
+
+          <Route path="/orders" element={<Orders />} />
+
+          <Route path="/orders/:id" element={<OrderDetails />} />
+
+          {/* Wanted Board */}
+          <Route path="/wanted" element={<WantedBoard />} />
+
+          <Route path="/wanted/create" element={<WantedPostCreate />} />
+
+          <Route path="/wanted/:id" element={<WantedPostDetails />} />
         </Route>
-
       </Route>
-
 
       {/* =====================================================
           AUTHENTICATION
       ====================================================== */}
 
       <Route element={<AuthLayout />}>
-
         <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+          <Route path="/register" element={<Register />} />
 
           <Route
             path="/seller/register"
-            element={<Register />}
+            element={<SellerApplication />}
           />
 
           <Route
             path="/forgot-password"
             element={<ForgotPassword />}
           />
-
         </Route>
-
       </Route>
-
 
       {/* =====================================================
           SELLER
       ====================================================== */}
 
       <Route element={<SellerRoute />}>
-
         <Route element={<SellerLayout />}>
 
           <Route
@@ -202,16 +179,13 @@ function App() {
           />
 
         </Route>
-
       </Route>
-
 
       {/* =====================================================
           ADMIN
       ====================================================== */}
 
       <Route element={<AdminRoute />}>
-
         <Route element={<AdminLayout />}>
 
           <Route
@@ -250,9 +224,7 @@ function App() {
           />
 
         </Route>
-
       </Route>
-
 
       {/* =====================================================
           SUPPORT / PUBLIC
@@ -282,6 +254,7 @@ function App() {
         element={
           <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
             <div className="text-center">
+
               <h1 className="text-7xl font-bold text-gray-900">
                 403
               </h1>
@@ -293,6 +266,7 @@ function App() {
               <p className="mt-2 text-gray-500">
                 You don't have permission to access this page.
               </p>
+
             </div>
           </div>
         }

@@ -1,15 +1,17 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const PublicRoute = () => {
-  const {
-    isAuthenticated,
-    user,
-    loading,
-  } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return null;
+  }
+
+  // Allow logged-in users to access the seller application page.
+  if (location.pathname === "/seller/register") {
+    return <Outlet />;
   }
 
   if (!isAuthenticated) {

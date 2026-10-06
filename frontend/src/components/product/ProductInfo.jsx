@@ -1,8 +1,12 @@
-import { useState } from "react";
+import{ useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaStar } from "react-icons/fa";
-import { FiShoppingCart, FiZap } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { FiShoppingCart, FiZap, FiHeart } from "react-icons/fi";
+
+import {
+  addToWishlist,
+  removeFromWishlist,
+  checkWishlist,
+} from "../../services/wishlistService";
 
 import QuantitySelector from "./QuantitySelector";
 
@@ -10,19 +14,117 @@ import { addToCart } from "../../services/cartService";
 
 import useAuth from "../../hooks/useAuth";
 
-const ProductInfo = ({
-  product,
-  quantity,
-  setQuantity,
-}) => {
+const ProductInfo = ({ product, quantity, setQuantity }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [addingToCart, setAddingToCart] =
-    useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
 
-  const [buyingNow, setBuyingNow] =
-    useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [updatingWishlist, setUpdatingWishlist] = useState(false);
+
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadWishlistStatus = async () => {
+      if (!user || !product?.id) {
+        setIsWishlisted(false);
+        return;
+      }
+
+      try {
+        const response = await checkWishlist(product.id);
+
+        if (!cancelled) {
+          const result = response.data;
+
+          setIsWishlisted(
+            typeof result === "boolean"
+              ? result
+              : result?.data === true
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setIsWishlisted(false);
+        }
+      }
+    };
+
+    loadWishlistStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, product?.id]);
+
+  const showMessage = (text, type = "error") => {
+    setMessage(text);
+    setMessageType(type);
+  };
+
+  const clearMessage = () => {
+    setMessage("");
+    setMessageType("");
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | WISHLIST
+  |--------------------------------------------------------------------------
+  */
+
+  const handleWishlist = async () => {
+    clearMessage();
+
+    if (!user) {
+      showMessage("Please login to use your wishlist.");
+      navigate("/login");
+      return;
+    }
+
+    if (!product?.id || updatingWishlist) return;
+
+    setUpdatingWishlist(true);
+
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(product.id);
+
+        setIsWishlisted(false);
+
+        showMessage(
+          "Removed from wishlist.",
+          "success"
+        );
+      } else {
+        await addToWishlist(product.id);
+
+        setIsWishlisted(true);
+
+        showMessage(
+          "Added to wishlist.",
+          "success"
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Wishlist update failed:",
+        error
+      );
+
+      showMessage(
+        error?.response?.data?.message ||
+          "Unable to update wishlist."
+      );
+    } finally {
+      setUpdatingWishlist(false);
+    }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -31,8 +133,10 @@ const ProductInfo = ({
   */
 
   const handleAddToCart = async () => {
+    clearMessage();
+
     if (!user) {
-      toast.error(
+      showMessage(
         "Please login to add products to cart."
       );
 
@@ -41,7 +145,9 @@ const ProductInfo = ({
     }
 
     if (!product?.id) {
-      toast.error("Product information is missing.");
+      showMessage(
+        "Product information is missing."
+      );
       return;
     }
 
@@ -49,12 +155,16 @@ const ProductInfo = ({
       product.stock !== undefined &&
       product.stock <= 0
     ) {
-      toast.error("This product is out of stock.");
+      showMessage(
+        "This product is out of stock."
+      );
       return;
     }
 
     if (!quantity || quantity < 1) {
-      toast.error("Please select a valid quantity.");
+      showMessage(
+        "Please select a valid quantity."
+      );
       return;
     }
 
@@ -66,10 +176,10 @@ const ProductInfo = ({
         quantity: quantity,
       });
 
-      toast.success(
-        "Product added to cart successfully."
+      showMessage(
+        "Product added to cart successfully.",
+        "success"
       );
-
     } catch (error) {
       console.error(
         "Add to cart failed:",
@@ -81,8 +191,11 @@ const ProductInfo = ({
         error?.response?.data ||
         "Unable to add product to cart.";
 
-      toast.error(message);
-
+      showMessage(
+        typeof message === "string"
+          ? message
+          : "Unable to add product to cart."
+      );
     } finally {
       setAddingToCart(false);
     }
@@ -95,8 +208,10 @@ const ProductInfo = ({
   */
 
   const handleBuyNow = async () => {
+    clearMessage();
+
     if (!user) {
-      toast.error(
+      showMessage(
         "Please login to continue."
       );
 
@@ -105,7 +220,9 @@ const ProductInfo = ({
     }
 
     if (!product?.id) {
-      toast.error("Product information is missing.");
+      showMessage(
+        "Product information is missing."
+      );
       return;
     }
 
@@ -113,12 +230,16 @@ const ProductInfo = ({
       product.stock !== undefined &&
       product.stock <= 0
     ) {
-      toast.error("This product is out of stock.");
+      showMessage(
+        "This product is out of stock."
+      );
       return;
     }
 
     if (!quantity || quantity < 1) {
-      toast.error("Please select a valid quantity.");
+      showMessage(
+        "Please select a valid quantity."
+      );
       return;
     }
 
@@ -128,7 +249,6 @@ const ProductInfo = ({
       /*
        * Add the selected product to the cart first.
        */
-
       await addToCart({
         productId: product.id,
         quantity: quantity,
@@ -137,22 +257,23 @@ const ProductInfo = ({
       /*
        * Then go to checkout.
        */
-
       navigate("/checkout");
-
     } catch (error) {
       console.error(
         "Buy now failed:",
         error
       );
 
-      const message =
+      const responseMessage =
         error?.response?.data?.message ||
         error?.response?.data ||
         "Unable to continue to checkout.";
 
-      toast.error(message);
-
+      showMessage(
+        typeof responseMessage === "string"
+          ? responseMessage
+          : "Unable to continue to checkout."
+      );
     } finally {
       setBuyingNow(false);
     }
@@ -160,6 +281,20 @@ const ProductInfo = ({
 
   return (
     <div>
+      {/* INLINE MESSAGE */}
+
+      {message && (
+        <div
+          className={`mb-6 rounded-xl border px-4 py-3 text-sm font-medium ${
+            messageType === "success"
+              ? "border-green-200 bg-green-50 text-green-700"
+              : "border-red-200 bg-red-50 text-red-700"
+          }`}
+          role="alert"
+        >
+          {message}
+        </div>
+      )}
 
       {/* CATEGORY */}
 
@@ -174,25 +309,6 @@ const ProductInfo = ({
       <h1 className="mt-4 text-4xl font-bold text-slate-800">
         {product.name}
       </h1>
-
-      {/* RATING */}
-
-      <div className="mt-4 flex items-center gap-2">
-
-        {[1, 2, 3, 4, 5].map(
-          (item) => (
-            <FaStar
-              key={item}
-              className="text-yellow-400"
-            />
-          )
-        )}
-
-        <span className="text-slate-500">
-          (4.8)
-        </span>
-
-      </div>
 
       {/* PRICE */}
 
@@ -225,7 +341,6 @@ const ProductInfo = ({
       {/* QUANTITY */}
 
       <div className="mt-8">
-
         <p className="mb-3 font-semibold text-slate-700">
           Quantity
         </p>
@@ -234,13 +349,11 @@ const ProductInfo = ({
           quantity={quantity}
           setQuantity={setQuantity}
         />
-
       </div>
 
       {/* ACTIONS */}
 
       <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-
         {/* BUY NOW */}
 
         <button
@@ -258,6 +371,39 @@ const ProductInfo = ({
           {buyingNow
             ? "Processing..."
             : "Buy Now"}
+        </button>
+
+        {/* WISHLIST */}
+
+        <button
+          type="button"
+          onClick={handleWishlist}
+          disabled={updatingWishlist}
+          aria-label={
+            isWishlisted
+              ? "Remove from wishlist"
+              : "Add to wishlist"
+          }
+          className={`flex items-center justify-center gap-2 rounded-xl border px-5 py-4 font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+            isWishlisted
+              ? "border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100"
+              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          <FiHeart
+            size={20}
+            className={
+              isWishlisted
+                ? "fill-current"
+                : ""
+            }
+          />
+
+          {updatingWishlist
+            ? "Updating..."
+            : isWishlisted
+              ? "Wishlisted"
+              : "Wishlist"}
         </button>
 
         {/* ADD TO CART */}
@@ -278,13 +424,11 @@ const ProductInfo = ({
             ? "Adding..."
             : "Add to Cart"}
         </button>
-
       </div>
 
       {/* SELLER */}
 
       <div className="mt-10 rounded-xl bg-slate-100 p-5">
-
         <h3 className="text-lg font-bold text-slate-800">
           Seller
         </h3>
@@ -293,9 +437,7 @@ const ProductInfo = ({
           {product.sellerName ||
             "Marketplace Seller"}
         </p>
-
       </div>
-
     </div>
   );
 };
