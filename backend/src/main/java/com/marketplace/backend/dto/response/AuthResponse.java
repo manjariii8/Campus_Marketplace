@@ -19,4 +19,10 @@ public class AuthResponse {
     private String email;
 
     private Role role;
+
+    // Campus information
+    private Long campusId;
+    private String campusName;
+    private String campusCity;
+    private String campusState;
 }

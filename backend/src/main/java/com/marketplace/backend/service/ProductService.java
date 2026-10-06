@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface ProductService {
 
-    ProductResponse createProduct(String email, ProductRequest request);
+    ProductResponse createProduct(
+            String email,
+            ProductRequest request
+    );
 
     ProductResponse updateProduct(
             Long id,
@@ -17,13 +20,27 @@ public interface ProductService {
             ProductRequest request
     );
 
-    void deleteProduct(Long id, String email);
+    void deleteProduct(
+            Long id,
+            String email
+    );
 
-    ProductResponse getProductById(Long id);
+    // Campus-aware product access
+    ProductResponse getProductById(
+            Long id,
+            String email
+    );
 
-    Page<ProductResponse> searchProducts(ProductFilterRequest filter);
+    Page<ProductResponse> searchProducts(
+            ProductFilterRequest filter,
+            String email
+    );
 
-    List<ProductResponse> getAllProducts();
+    List<ProductResponse> getAllProducts(
+            String email
+    );
 
-    List<ProductResponse> getProductsBySeller(String email);
+    List<ProductResponse> getProductsBySeller(
+            String email
+    );
 }

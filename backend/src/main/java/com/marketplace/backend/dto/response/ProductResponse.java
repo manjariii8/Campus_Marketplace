@@ -1,5 +1,7 @@
 package com.marketplace.backend.dto.response;
 
+import com.marketplace.backend.enums.ItemCondition;
+import com.marketplace.backend.enums.ListingType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,4 +32,18 @@ public class ProductResponse {
     private String categoryName;
 
     private String imageData;
+
+    private ItemCondition condition;
+
+    private ListingType listingType;
+
+    private String defects;
+
+    private String pickupLocation;
+
+    private String course;
+
+    private String subject;
+
+    private Integer semester;
 }

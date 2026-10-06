@@ -13,8 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -48,19 +48,22 @@ public class ProductController {
                 response
         );
     }
-    @Operation(summary = "Get all products")
-    @GetMapping
-    public ApiResponse<List<ProductResponse>> getAllProducts() {
 
-        List<ProductResponse> products = productService.getAllProducts();
+    @Operation(summary = "Get all products from the user's campus")
+    @GetMapping
+    public ApiResponse<List<ProductResponse>> getAllProducts(
+            Authentication authentication) {
+
+        List<ProductResponse> products =
+                productService.getAllProducts(
+                        authentication.getName()
+                );
 
         return ResponseUtil.success(
                 "Products fetched successfully",
                 products
         );
-
     }
-
 
     @PutMapping("/{id}")
     public ProductResponse updateProduct(
@@ -74,29 +77,47 @@ public class ProductController {
                 request
         );
     }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(
             @PathVariable Long id,
             Authentication authentication) {
 
-        productService.deleteProduct(id, authentication.getName());
+        productService.deleteProduct(
+                id,
+                authentication.getName()
+        );
     }
+
     @GetMapping("/search")
     public Page<ProductResponse> searchProducts(
-            ProductFilterRequest filter) {
+            ProductFilterRequest filter,
+            Authentication authentication) {
 
-        return productService.searchProducts(filter);
+        return productService.searchProducts(
+                filter,
+                authentication.getName()
+        );
     }
+
     @GetMapping("/my-products")
-    public List<ProductResponse> getMyProducts(Authentication authentication) {
-        return productService.getProductsBySeller(authentication.getName());
+    public List<ProductResponse> getMyProducts(
+            Authentication authentication) {
+
+        return productService.getProductsBySeller(
+                authentication.getName()
+        );
     }
+
     @GetMapping("/{id}")
     public ProductResponse getProduct(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            Authentication authentication) {
 
-        return productService.getProductById(id);
-
+        return productService.getProductById(
+                id,
+                authentication.getName()
+        );
     }
 }

@@ -18,4 +18,7 @@ public class WishlistResponse {
     private BigDecimal price;
 
     private String categoryName;
+
+    // Product image stored as Base64 data
+    private String imageData;
 }

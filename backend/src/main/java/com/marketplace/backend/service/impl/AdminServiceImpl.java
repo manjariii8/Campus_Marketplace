@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package com.marketplace.backend.service.impl;
 
 import com.marketplace.backend.dto.admin.*;
@@ -136,9 +130,10 @@ public class AdminServiceImpl implements AdminService {
                 .toList();
     }
 
-    @Override
-    public void approveSeller(Long sellerId) {
 
+    @Override
+    @Transactional
+    public void approveSeller(Long sellerId) {
         SellerProfile seller = sellerProfileRepository
                 .findById(sellerId)
                 .orElseThrow(() ->
@@ -147,12 +142,16 @@ public class AdminServiceImpl implements AdminService {
         seller.setStatus(SellerStatus.APPROVED);
         seller.setVerified(true);
 
+        // Update the associated user's role after approval.
+        User user = seller.getUser();
+        user.setRole(Role.SELLER);
+        userRepository.save(user);
+
         sellerProfileRepository.save(seller);
     }
-
     @Override
+    @Transactional
     public void rejectSeller(Long sellerId) {
-
         SellerProfile seller = sellerProfileRepository
                 .findById(sellerId)
                 .orElseThrow(() ->
@@ -161,8 +160,14 @@ public class AdminServiceImpl implements AdminService {
         seller.setStatus(SellerStatus.REJECTED);
         seller.setVerified(false);
 
+        // Restore customer access after rejection.
+        User user = seller.getUser();
+        user.setRole(Role.CUSTOMER);
+        userRepository.save(user);
+
         sellerProfileRepository.save(seller);
     }
+
 
     @Override
     public List<ProductResponse> getAllProducts(){

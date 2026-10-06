@@ -5,6 +5,7 @@ import com.marketplace.backend.dto.response.SellerProfileResponse;
 import com.marketplace.backend.entity.SellerProfile;
 import com.marketplace.backend.entity.User;
 import com.marketplace.backend.enums.Role;
+import com.marketplace.backend.enums.SellerStatus;
 import com.marketplace.backend.exception.DuplicateResourceException;
 import com.marketplace.backend.exception.ResourceNotFoundException;
 import com.marketplace.backend.mapper.SellerProfileMapper;
@@ -14,6 +15,7 @@ import com.marketplace.backend.service.SellerProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -23,13 +25,21 @@ public class SellerProfileServiceImpl implements SellerProfileService {
     private final SellerProfileRepository sellerProfileRepository;
     private final UserRepository userRepository;
     private final SellerProfileMapper sellerProfileMapper;
-    @Override
-    public SellerProfileResponse createProfile(String email, SellerProfileRequest request) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if(sellerProfileRepository.findByUser(user).isPresent()){
-            throw new DuplicateResourceException("Seller profile already exists");
+    @Override
+    @Transactional
+    public SellerProfileResponse createProfile(
+            String email,
+            SellerProfileRequest request
+    ) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        if (sellerProfileRepository.findByUser(user).isPresent()) {
+            throw new DuplicateResourceException(
+                    "Seller profile already exists"
+            );
         }
 
         SellerProfile profile = SellerProfile.builder()
@@ -38,16 +48,19 @@ public class SellerProfileServiceImpl implements SellerProfileService {
                 .address(request.getAddress())
                 .description(request.getDescription())
                 .verified(false)
-
+                .status(SellerStatus.PENDING)
                 .user(user)
                 .build();
-        sellerProfileRepository.save(profile);
 
-        user.setRole(Role.SELLER);
-        userRepository.save(user);
+        SellerProfile savedProfile =
+                sellerProfileRepository.save(profile);
 
-        return sellerProfileMapper.toResponse(profile);
+
+
+
+        return sellerProfileMapper.toResponse(savedProfile);
     }
+
 
     @Override
     public SellerProfileResponse getProfile(String email) {

@@ -1,5 +1,7 @@
 package com.marketplace.backend.dto.request;
 
+import com.marketplace.backend.enums.ItemCondition;
+import com.marketplace.backend.enums.ListingType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -41,4 +43,24 @@ public class ProductRequest {
 
     // NEW
     private String imageData;
+
+    private ItemCondition condition = ItemCondition.GOOD;
+
+    private ListingType listingType = ListingType.ITEM;
+
+    @Size(max = 1000, message = "Defects cannot exceed 1000 characters")
+    private String defects;
+
+    @Size(max = 120, message = "Pickup location cannot exceed 120 characters")
+    private String pickupLocation;
+
+    @Size(max = 100, message = "Course cannot exceed 100 characters")
+    private String course;
+
+    @Size(max = 100, message = "Subject cannot exceed 100 characters")
+    private String subject;
+
+    @Min(value = 1, message = "Semester must be at least 1")
+    @Max(value = 12, message = "Semester cannot exceed 12")
+    private Integer semester;
 }

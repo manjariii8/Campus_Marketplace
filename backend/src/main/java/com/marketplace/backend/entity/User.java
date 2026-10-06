@@ -4,9 +4,8 @@ import com.marketplace.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,8 +28,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private SellerProfile sellerProfile;
 
-
+    // CampusLoop: every user belongs to a campus
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campus_id")
+    private Campus campus;
 }

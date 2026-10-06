@@ -9,7 +9,9 @@ import com.marketplace.backend.repository.ProductRepository;
 import com.marketplace.backend.repository.UserRepository;
 import com.marketplace.backend.repository.WishlistRepository;
 import com.marketplace.backend.service.WishlistService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +36,9 @@ public class WishlistServiceImpl implements WishlistService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
+                        new ResourceNotFoundException(
+                                "User not found"
+                        ));
     }
 
     @Override
@@ -44,9 +48,14 @@ public class WishlistServiceImpl implements WishlistService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Product not found"));
+                        new ResourceNotFoundException(
+                                "Product not found"
+                        ));
 
-        if (wishlistRepository.findByUserAndProduct(user, product).isPresent()) {
+        if (wishlistRepository
+                .findByUserAndProduct(user, product)
+                .isPresent()) {
+
             return;
         }
 
@@ -65,9 +74,14 @@ public class WishlistServiceImpl implements WishlistService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Product not found"));
+                        new ResourceNotFoundException(
+                                "Product not found"
+                        ));
 
-        wishlistRepository.deleteByUserAndProduct(user, product);
+        wishlistRepository.deleteByUserAndProduct(
+                user,
+                product
+        );
     }
 
     @Override
@@ -79,10 +93,24 @@ public class WishlistServiceImpl implements WishlistService {
                 .stream()
                 .map(item -> WishlistResponse.builder()
                         .id(item.getId())
-                        .productId(item.getProduct().getId())
-                        .productName(item.getProduct().getName())
-                        .price(item.getProduct().getPrice())
-                        .categoryName(item.getProduct().getCategory().getName())
+                        .productId(
+                                item.getProduct().getId()
+                        )
+                        .productName(
+                                item.getProduct().getName()
+                        )
+                        .price(
+                                item.getProduct().getPrice()
+                        )
+                        .categoryName(
+                                item.getProduct()
+                                        .getCategory()
+                                        .getName()
+                        )
+                        .imageData(
+                                item.getProduct()
+                                        .getImageData()
+                        )
                         .build())
                 .toList();
     }
@@ -94,11 +122,12 @@ public class WishlistServiceImpl implements WishlistService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Product not found"));
+                        new ResourceNotFoundException(
+                                "Product not found"
+                        ));
 
         return wishlistRepository
                 .findByUserAndProduct(user, product)
                 .isPresent();
     }
 }
-

@@ -1,6 +1,5 @@
 package com.marketplace.backend.dto.request;
 
-import com.marketplace.backend.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +28,6 @@ public class RegisterRequest {
     )
     private String password;
 
-    @NotNull(message = "Role is required")
-    private Role role;
+    @NotNull(message = "Campus selection is required")
+    private Long campusId;
 }
