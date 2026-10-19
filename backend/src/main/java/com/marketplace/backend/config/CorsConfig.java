@@ -21,8 +21,8 @@ public class CorsConfig implements WebMvcConfigurer {
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        "https://frontend-one-pink-zwarks8a65.vercel.app",
-                        "https://frontend-git-main-manjaritripathitech-4596s-projects.vercel.app"
+                        "campus-marketplace-topaz-iota.vercel.app",
+                        "campus-marketplace-519amxsjg-manjaritripathitech-4596s-projects.vercel.app"
                 )
         );
 
