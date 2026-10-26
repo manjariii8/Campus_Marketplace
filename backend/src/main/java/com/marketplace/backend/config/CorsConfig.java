@@ -18,7 +18,7 @@ public class CorsConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://campus-marketplace-topaz-iota.vercel.app"
+                "https://campus-marketplace-jf6g7dj3w-manjaritripathitech-4596s-projects.vercel.app"
         ));
 
         configuration.setAllowedMethods(List.of(
